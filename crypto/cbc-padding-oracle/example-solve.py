@@ -82,8 +82,7 @@ def single_block_attack(block):
 
     return zeroing_iv
 
-def test_systems_security(base_url):
-    new_ciphertext = bytes.fromhex('2cc9a9fc7cb4dc60f1df7babc4bf82c1122b12cbd8a1c10e1d7f1d4cf57c60ed8cb3703e30ff4b1a2a9af418df999c71b331721a24e713668d0478351a4ccad77fa6abff498d919b3773e6e25fcad5556545a6339b9d4f42c854f96e940a538342424242424242424242424242424242')    
+def test_systems_security(base_url):    
     token = get_token()
    
     res = full_attack(token[:BLOCK_SIZE], token[BLOCK_SIZE:])

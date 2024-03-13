@@ -12,8 +12,8 @@ import requests
 import json
 import base64
 
-base_url = "http://127.0.0.1:5000"
-#base_url = "https://cbc-rsa.syssec.dk:8001"
+#base_url = "http://127.0.0.1:5000"
+base_url = "https://cbc-rsa.syssec.dk:8001"
 # Replace with the actual endpoint and parameters
 
 
@@ -52,12 +52,12 @@ m1 = "random msg ".encode()
 
 m = "You got a 12 because you are an excellent student! :)".encode()
 
-# Step 2: Get the server to sign m1 and m2
-response1 = requests.get(f'http://localhost:5000/sign_random_document_for_students/{m1.hex()}')
+# Step 2: Get the server to sign m1 and obtain s1
+response1 = requests.get(f'https://cbc-rsa.syssec.dk:8001/sign_random_document_for_students/{m1.hex()}')
 s1 = json.loads(response1.text)['signature']
 s1 = int(s1, 16)
 # Get the server's public key
-response = requests.get('http://localhost:5000/pk/')
+response = requests.get('https://cbc-rsa.syssec.dk:8001/pk/')
 public_key = json.loads(response.text)
 N = public_key['N']
 e = public_key['e']
@@ -73,7 +73,7 @@ m2_lengh = (m2.bit_length() + 7) // 8
 m2_bytes = m2.to_bytes(m2_lengh, 'big')
 m2 = m2_bytes
 
-response2 = requests.get(f'http://localhost:5000/sign_random_document_for_students/{m2.hex()}')
+response2 = requests.get(f'https://cbc-rsa.syssec.dk:8001/sign_random_document_for_students/{m2.hex()}')
 s2 = json.loads(response2.text)['signature']
 s2 = int(s2, 16)
 
@@ -90,5 +90,5 @@ new_grade = {"msg": m.hex(), "signature": signature.hex()}
 j = json.dumps(new_grade)
 c = json_to_cookie(j)
 
-response = requests.get('http://localhost:5000/quote/', cookies= {'grade': c})
+response = requests.get('https://cbc-rsa.syssec.dk:8001/quote/', cookies= {'grade': c})
 print(response.text)
