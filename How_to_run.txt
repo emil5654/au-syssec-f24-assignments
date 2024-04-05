@@ -1,0 +1,3 @@
+To test exercise 1, you need to install the nececary libearies and run 
+Sudo python3 client.py 
+Sudo python3 server.py

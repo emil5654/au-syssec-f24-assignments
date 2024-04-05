@@ -28,7 +28,7 @@ def handle_icmp_message(packet):
         icmp_packet = packet[ICMP]
         raw_payload = packet[Raw].load
         
-        if icmp_packet.type == 47:  # Check if it's your custom ICMP type
+        if icmp_packet.type == 47:
             # Decrypt the payload
             decrypted_payload = decrypt_with_aes_cbc(preshared_secret_key, raw_payload)
             

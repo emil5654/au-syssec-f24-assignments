@@ -1,0 +1,8 @@
+docker-compose build # Build the container image
+docker-compose up # Start the container
+docker-compose down # Shut down the container
+// Aliases for the Compose commands above
+dcbuild # Alias for: docker-compose build
+SEED Labs – VPN Lab: The Container Version 3
+dcup # Alias for: docker-compose up
+dcdown # Alias for: docker-compose down

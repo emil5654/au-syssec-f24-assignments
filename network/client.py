@@ -47,8 +47,7 @@ def send_msg(text):
     dstip = '127.0.0.1'
     ip_part = IP(dst=dstip)/ICMP(type=47)/Raw(load=text)
     try:
-        send(ip_part, iface='eth0')
-        print("Message sent successfully.")
+        send(ip_part)
     except Exception as e:
         print(f"Error sending message: {e}")
 
