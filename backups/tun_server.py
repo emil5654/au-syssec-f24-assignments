@@ -4,8 +4,8 @@ import fcntl
 import struct
 import os 
 import time
-import ssl
-import socket
+
+
 #Tun interface
 TUNSETIFF = 0x400454ca
 IFF_TUN = 0x0001
@@ -24,32 +24,16 @@ print("Interface name:{}".format(ifname))
 os.system("ip addr add 192.168.53.11/24 dev {}".format(ifname))
 os.system("ip link set dev {} up".format(ifname))
 
-#SSL
-context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-context.load_cert_chaiSn(certfile='cert.pem', keyfile='key.pem')
-
-
 
 #UDP server
 IP_A = "0.0.0.0"
 PORT = 9090
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((IP_A, PORT))
-sock.listen(5)
-
-
 while True:
-	newsocket, fromaddr = sock.accept()
-	ssl_sock = context.wrap_socket(newsocket, server_side = True)
-
-	try:
-		while True:
-			data = ssl_sock.recv(2048)
-			if not data:
-				break
-			print (f"Got data from {fromaddr}")
-			os.write(tun, data)
-	finally:
-		ssl_sock.shutdown(socket.SHUT_RDWR)
-		ssl_sock.close()
-sock.close()
+	data, (ip,port) = sock.recvfrom(2048)
+	print("{}:{} --> {}:{}".format(ip, port, IP_A, PORT))
+	pkt = IP(data)
+	print(" Inside:{} --> {}".format(pkt.src, pkt.dst))
+	
+	os.write(tun, bytes(pkt))
