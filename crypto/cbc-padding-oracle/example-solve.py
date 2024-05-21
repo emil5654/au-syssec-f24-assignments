@@ -11,8 +11,8 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
 BLOCK_SIZE = 16
-#base_url = "http://127.0.0.1:5000"
-base_url = "https://cbc-rsa.syssec.dk:8000/"
+base_url = "http://127.0.0.1:5000"
+#base_url = "https://cbc-rsa.syssec.dk:8000/"
 
 def oracle(block):
     res = requests.get(f'{base_url}/quote/', cookies={'authtoken': block.hex()} )
