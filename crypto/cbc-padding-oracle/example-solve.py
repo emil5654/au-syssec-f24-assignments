@@ -9,19 +9,23 @@ from http.cookies import SimpleCookie
 from flask import Flask, request, make_response, redirect, url_for
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 
 BLOCK_SIZE = 16
 base_url = "http://127.0.0.1:5000"
 #base_url = "https://cbc-rsa.syssec.dk:8000/"
 
 def oracle(block):
-    res = requests.get(f'{base_url}/quote/', cookies={'authtoken': block.hex()} )
-	
-    if res.text.__contains__("PKCS#7 padding is incorrect") or res.text.__contains__("Padding is incorrect."):
-        return False
-    else:
-        print(res.text)
-        return True
+    try:
+        res = requests.get(f'{base_url}/quote/', cookies={'authtoken': block.hex()}, timeout=5)
+        if "PKCS#7 padding is incorrect" in res.text or "Padding is incorrect." in res.text:
+            return False
+        else:
+            print(res.text)
+            return True
+    except (ConnectionError) as e:
+        print(f"Connection error: {e}, retrying...")
+        return oracle(block)
     
 def get_token():
     #The requests for getting the cookie
@@ -51,6 +55,22 @@ def full_attack(iv, ct):
         iv = ct
 
     return result
+
+def craft_ciphertext(desired_plaintext):
+
+    desired_plaintext = pad(desired_plaintext, BLOCK_SIZE)
+    blocks = [desired_plaintext[i:i+BLOCK_SIZE] for i in range(0, len(desired_plaintext), BLOCK_SIZE)]
+    CT_n = get_random_bytes(16)
+    result = b'' + CT_n
+    for block in reversed(blocks):
+        PT_n = single_block_attack(CT_n) #gets the zeroing_iv
+        CT_n1 = bytes(a ^ b for a,b in zip(PT_n, block)) #xor zeroing_iv with the plain_text
+        result = CT_n1 + result
+        CT_n = CT_n1
+    
+    return result
+
+
 
 def single_block_attack(block):
     """Returns the decryption of the given ciphertext block"""
@@ -89,8 +109,18 @@ def test_systems_security(base_url):
     plaintext = unpad(res, 16)
     print("Recovered plaintext:", plaintext)
 
+    secret = res.split(b'"')[1]
+    print("Secret:", secret)
+    new_plain = "I should have used authenticated encryption because ..." + ' plain CBC is not secure!'
+    new_plain_bytes = bytes(new_plain, 'utf-8')
+
+
+    res = craft_ciphertext(new_plain_bytes)
+
+    res = requests.get(f'{base_url}/quote/', cookies={'authtoken': res.hex()} )
+
+    print(res.text)
 
 if __name__ == '__main__':
-    #base_url = "http://127.0.0.1:5000"
-    new_url = "https://cbc-rsa.syssec.dk:8000/"
+    
     test_systems_security(base_url)
